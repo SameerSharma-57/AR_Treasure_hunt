@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "184088277815",
+    "firebase_url": "https://listingrdb-default-rtdb.firebaseio.com",
+    "project_id": "listingrdb",
+    "storage_bucket": "listingrdb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:184088277815:android:4ad6d6ee9f554d9041a0b2",
+        "android_client_info": {
+          "package_name": "com.DefaultCompany.Listing_RDB"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "184088277815-vv1h61pd0bk7ru286irek8v4rictjt7k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3WU9xUkRmUNAxGeX85iNZhkYrDm_0uac"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "184088277815-vv1h61pd0bk7ru286irek8v4rictjt7k.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "184088277815-tfee07vljsdv6kg0o7rn62k9g70hmmhm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.DefaultCompany.Listing-RDB"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

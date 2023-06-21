@@ -1,0 +1,20 @@
+* annex.largefiles=(largerthan)100M
+Assets -text
+Builds -text
+Logs -text
+ProjectSettings -text
+README.md -text
+SimpleFileBrowser.Runtime.csproj -text
+Assembly-CSharp.csproj -text
+Packages -text
+Temp -text
+game.aab -text
+New[[:space:]]folder -text
+Listing_RDB.sln -text
+Pror.apk -text
+UserSettings -text
+obj -text
+rdb.apk -text
+Library -text
+<pattern> -text lockable
+. -text lockable
