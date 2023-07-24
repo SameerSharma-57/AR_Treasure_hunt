@@ -10,6 +10,7 @@ using Firebase.Storage;
 using Firebase.Extensions;
 using System.IO;
 using SimpleFileBrowser;
+using Firebase.Auth;
 
 public class DataBase_Manager : MonoBehaviour
 {
@@ -24,19 +25,23 @@ public class DataBase_Manager : MonoBehaviour
     private int totalcountmodel;
     private int totalroomcount;
     private DatabaseReference databaseref;
-    string user_id;
+    private FirebaseAuth auth;
+    public string user_id = "";
     string room_id;
     StorageReference storageReference;
     FirebaseStorage storage;
-    [SerializeField] InputField name;
-    [SerializeField] InputField user_id_of_player;
-    [SerializeField] InputField username_of_player;
-    [SerializeField] InputField Model_name;
-    [SerializeField] InputField room_id_to_join;
+    public InputField email;
+    public InputField email_signin;
+    public InputField password_signin;
+    public InputField Model_name;
+    public InputField room_id_to_join;
+    public InputField password;
+    public InputField username;
     void Start()
     {
         databaseref = FirebaseDatabase.DefaultInstance.RootReference;
-        databaseref.Child("userdata").GetValueAsync().ContinueWith(task =>
+        auth = FirebaseAuth.DefaultInstance;
+        /*databaseref.Child("userdata").GetValueAsync().ContinueWith(task =>
         {
             totalcount = (int)task.Result.ChildrenCount;
             Debug.Log(totalcount);
@@ -47,7 +52,7 @@ public class DataBase_Manager : MonoBehaviour
             totalroomcount = (int)task.Result.ChildrenCount;
             Debug.Log(totalroomcount);
         } 
-        );
+        );*/
         storage = FirebaseStorage.DefaultInstance;
         storageReference = storage.GetReferenceFromUrl("gs://listingrdb.appspot.com");
 
@@ -63,15 +68,28 @@ public class DataBase_Manager : MonoBehaviour
 
     }
     public void WriteNewUser(){
-        user_id = "UserID" + totalcount.ToString();
-        totalcount++;
-        User user = new User(name.text);
-        Dictionary<string, object> result = new Dictionary<string, object>();
-        result["username"] = user.username;
-        databaseref.Child("userdata").Child(user_id).SetValueAsync(result);
+        auth.CreateUserWithEmailAndPasswordAsync(email.text, password.text).ContinueWith(task =>
+         {
+             if (task.IsCanceled)
+             {
+                 Debug.LogError("CreateUserWithEmailAndPasswordAsync was canceled.");
+                 return;
+             }
+             if (task.IsFaulted)
+             {
+                 Debug.LogError("CreateUserWithEmailAndPasswordAsync encountered an error: " + task.Exception);
+                 return;
+             }
+             Firebase.Auth.FirebaseUser result = task.Result;
+             Debug.LogFormat("Firebase user created successfully: {0} ({1})",
+             result.Email, result.UserId,username.text);
+             Dictionary<string, string> user = new Dictionary<string, string>();
+             user["username"] = username.text;
+             databaseref.Child("users").Child(result.UserId).SetValueAsync(user);
+         });
     }
     public void GetUserData(){
-        databaseref.Child("userdata").Child(user_id_of_player.text).GetValueAsync().ContinueWith(task => {
+        databaseref.Child("userdata").Child(user_id).GetValueAsync().ContinueWith(task => {
         if (task.IsCompleted) {
           DataSnapshot snapshot = task.Result;
           foreach (var palyer in snapshot.Children)
@@ -81,16 +99,26 @@ public class DataBase_Manager : MonoBehaviour
         }
       });
     }
-    public void Model_upload(){
+    public void Signin(){
+        
+        auth.SignInWithEmailAndPasswordAsync(email_signin.text, password_signin.text).ContinueWith(task => {
+            if (task.IsCanceled)
+            {
+                Debug.LogError("SignInWithEmailAndPasswordAsync was canceled.");
+                return;
+            }
+            if (task.IsFaulted)
+            {
+                Debug.LogError("SignInWithEmailAndPasswordAsync encountered an error: " + task.Exception);
+                return;
+            }
+            user_id = auth.CurrentUser.UserId;
+            Debug.Log(user_id);
+        });
         Model_upload_panel.SetActive(true);
         ExistUserPan.SetActive(false);
         NewUserPan.SetActive(false);
-        databaseref.Child("userdata").Child(user_id_of_player.text).Child("Models").GetValueAsync().ContinueWith(task =>
-        {
-            totalcountmodel = (int)task.Result.ChildrenCount;
-            Debug.Log(totalcountmodel);
-        }
-        );
+
     }
     public void Redirect(){
         NewUserPan.SetActive(false);
@@ -116,7 +144,7 @@ public class DataBase_Manager : MonoBehaviour
             var newMetadata = new MetadataChange();
             newMetadata.ContentType = ".obj";
 
-            StorageReference uploadRef = storageReference.Child(user_id_of_player.text + "/" + Model_name.text);
+            StorageReference uploadRef = storageReference.Child(user_id + "/" + Model_name.text);
             Debug.Log("File upload started");
             uploadRef.PutBytesAsync(bytes, newMetadata).ContinueWithOnMainThread((task) => { 
                 if(task.IsFaulted || task.IsCanceled){
@@ -128,13 +156,13 @@ public class DataBase_Manager : MonoBehaviour
             });
         }
     }
-    public void SetModels()
+    /*public void SetModels()
     { 
         totalcountmodel++;
         string modelname = "Models" + totalcountmodel.ToString();
         databaseref.Child("userdata").Child(user_id_of_player.text).Child("Models").Child(modelname).SetValueAsync(Model_name.text);
-    }
-    public void GetModels()
+    }*/
+    /*public void GetModels()
     {
         var dd = dropdown.GetComponent<Dropdown>();
         dd.options.Clear();
@@ -151,20 +179,20 @@ public class DataBase_Manager : MonoBehaviour
                 dd.value = 0;
             }
         });
-    }
-    public void CreateRoom()
+    }*/
+    /*public void CreateRoom()
     {
         totalroomcount++;
         room_id = "Room" + totalroomcount.ToString();
         string creater_of_room = user_id_of_player.text;
         databaseref.Child("Rooms").Child(room_id).Child(creater_of_room).SetValueAsync(username_of_player.text);
-    }
+    }*/
     public void JoinRoomPanel()
     {
         Details_room_panel.SetActive(false);
         Join_room_panel.SetActive(true);
     }
-    public void JoinRoom()
+   /* public void JoinRoom()
     { 
         if(room_id_to_join.text == "")
         {
@@ -174,6 +202,6 @@ public class DataBase_Manager : MonoBehaviour
         {
             databaseref.Child("Rooms").Child(room_id_to_join.text).Child("Players Joined").Child(user_id_of_player.text).SetValueAsync(username_of_player.text);
         }
-    }
+    }*/
 }
 
